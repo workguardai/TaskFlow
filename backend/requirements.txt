@@ -1,0 +1,7 @@
+flask
+flask-sqlalchemy
+pydantic
+pytest
+sqlalchemy
+python-dateutil
+flask-cors
