@@ -62,6 +62,7 @@ def seed_data():
     db.session.commit()
     logger.info("SEEDING_DATABASE: Success")
 
+app = create_app()
+
 if __name__ == "__main__":
-    app = create_app()
     app.run(debug=True, port=5000)
