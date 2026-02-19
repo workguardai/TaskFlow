@@ -5,3 +5,4 @@ pytest
 sqlalchemy
 python-dateutil
 flask-cors
+gunicorn
