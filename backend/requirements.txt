@@ -1,8 +1,8 @@
 flask
-flask-sqlalchemy
 pydantic
+psycopg2-binary
 pytest
-sqlalchemy
 python-dateutil
 flask-cors
 gunicorn
+python-dotenv

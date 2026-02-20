@@ -1,4 +1,5 @@
 from datetime import date
+from typing import List
 from app.models.models import User, UserStatus, Task, TaskStatus
 
 class DomainException(Exception):
@@ -14,15 +15,16 @@ def validate_task_completion(task: Task, new_status: TaskStatus):
 
 def validate_user_assignment(user: User):
     """Rule 2 — : A task cannot be assigned to an inactive user."""
-    if user.status == UserStatus.INACTIVE:
+    if user.status == UserStatus.INACTIVE or (isinstance(user.status, str) and user.status == "inactive"):
         raise DomainException("User is inactive")
 
-def validate_no_overlap(user: User, start_date: date, end_date: date, exclude_task_id: int = None):
+def validate_no_overlap(existing_tasks: List[Task], start_date: date, end_date: date, exclude_task_id: int = None):
     """Rule 3 — : A user cannot have two tasks that overlap in time."""
-    for task in user.tasks:
+    for task in existing_tasks:
         if exclude_task_id and task.id == exclude_task_id:
             continue
         
         # Check for overlap: (StartA <= EndB) and (EndA >= StartB)
         if start_date <= task.end_date and end_date >= task.start_date:
             raise DomainException(f"Task overlaps with an existing task: {task.title}")
+

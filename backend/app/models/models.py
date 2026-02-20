@@ -1,8 +1,7 @@
 from datetime import date
-from sqlalchemy import String, Date, ForeignKey, Enum as SqlEnum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from ..db import db
 import enum
+from dataclasses import dataclass
+from typing import Optional
 
 class UserStatus(enum.Enum):
     ACTIVE = "active"
@@ -13,23 +12,18 @@ class TaskStatus(enum.Enum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
 
-class User(db.Model):
-    __tablename__ = "users"
+@dataclass
+class User:
+    id: Optional[int]
+    name: str
+    status: UserStatus = UserStatus.ACTIVE
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    status: Mapped[UserStatus] = mapped_column(SqlEnum(UserStatus), default=UserStatus.ACTIVE)
+@dataclass
+class Task:
+    id: Optional[int]
+    title: str
+    start_date: date
+    end_date: date
+    status: TaskStatus = TaskStatus.PENDING
+    user_id: Optional[int] = None
 
-    tasks: Mapped[list["Task"]] = relationship(back_populates="assigned_user")
-
-class Task(db.Model):
-    __tablename__ = "tasks"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(200), nullable=False)
-    start_date: Mapped[date] = mapped_column(Date, nullable=False)
-    end_date: Mapped[date] = mapped_column(Date, nullable=False)
-    status: Mapped[TaskStatus] = mapped_column(SqlEnum(TaskStatus), default=TaskStatus.PENDING)
-    
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
-    assigned_user: Mapped["User"] = relationship(back_populates="tasks")

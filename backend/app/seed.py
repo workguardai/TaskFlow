@@ -1,30 +1,43 @@
-from app.models.models import User, Task, UserStatus
 from datetime import datetime, timedelta
 from app.db import db
 import logging
 
 logger = logging.getLogger(__name__)
 
-
 def seed_data():
+    with db.get_cursor() as cur:
+        # Check if users exist
+        cur.execute("SELECT id FROM users LIMIT 1")
+        if cur.fetchone():
+            return
 
-
-    if User.query.first():
-        return
-
-    logger.info("SEEDING_DATABASE: Starting...")
-    
-    alice = User(name="Alice Smith", status=UserStatus.ACTIVE)
-    bob = User(name="Bob Jones", status=UserStatus.ACTIVE)
-    charlie = User(name="Charlie Davis", status=UserStatus.INACTIVE)
-    
-    db.session.add_all([alice, bob, charlie])
-    db.session.commit()
-
-    t1 = Task(title="Design System Review", start_date=datetime.now(), end_date=datetime.now() + timedelta(days=2), user_id=alice.id)
-    t2 = Task(title="API Integration", start_date=datetime.now() + timedelta(days=1), end_date=datetime.now() + timedelta(days=5), user_id=bob.id)
-    t3 = Task(title="Documentation", start_date=datetime.now() + timedelta(days=3), end_date=datetime.now() + timedelta(days=4))
-    
-    db.session.add_all([t1, t2, t3])
-    db.session.commit()
-    logger.info("SEEDING_DATABASE: Success")
+        logger.info("SEEDING_DATABASE: Starting...")
+        
+        # Insert Users and get IDs
+        cur.execute("INSERT INTO users (name, status) VALUES (%s, %s) RETURNING id", ("Alice Smith", "active"))
+        alice_id = cur.fetchone()['id']
+        
+        cur.execute("INSERT INTO users (name, status) VALUES (%s, %s) RETURNING id", ("Bob Jones", "active"))
+        bob_id = cur.fetchone()['id']
+        
+        cur.execute("INSERT INTO users (name, status) VALUES (%s, %s) RETURNING id", ("Charlie Davis", "inactive"))
+        charlie_id = cur.fetchone()['id']
+        
+        # Insert Tasks
+        now = datetime.now()
+        cur.execute(
+            "INSERT INTO tasks (title, start_date, end_date, user_id) VALUES (%s, %s, %s, %s)",
+            ("Design System Review", now, now + timedelta(days=2), alice_id)
+        )
+        
+        cur.execute(
+            "INSERT INTO tasks (title, start_date, end_date, user_id) VALUES (%s, %s, %s, %s)",
+            ("API Integration", now + timedelta(days=1), now + timedelta(days=5), bob_id)
+        )
+        
+        cur.execute(
+            "INSERT INTO tasks (title, start_date, end_date) VALUES (%s, %s, %s)",
+            ("Documentation", now + timedelta(days=3), now + timedelta(days=4))
+        )
+        
+        logger.info("SEEDING_DATABASE: Success")
