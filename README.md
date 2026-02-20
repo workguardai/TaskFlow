@@ -1,55 +1,80 @@
-# Task Rules Engine (Flask)
+# TaskFlow (Task Rules Engine)
 
-This is a production-quality Flask backend for a Task Rules Engine, built with a focus on correctness, structure, and safe state transitions.
+A production-quality Task Management System built with Python/Flask and React, demonstrating clean architecture, strict domain rule enforcement, and AI-assisted professional development.
 
-## Architecture
+## Quick Start
 
-The system follows a layered architecture to ensure separation of concerns:
-
-- **API Layer** (`backend/app/api/`): Flask routes that handle HTTP requests, validate input using Pydantic, and return structured JSON responses. Business logic is strictly kept out of this layer.
-- **Service Layer** (`backend/app/services/`): Orchestrates business operations and enforces domain rules. This is the entry point for all data mutations.
-- **Domain Layer** (`backend/app/domain/`): Contains the core invariants and rules of the system. This layer has no dependencies on external frameworks like Flask or SQLAlchemy.
-- **Persistence Layer** (`backend/app/models/`): SQLAlchemy models for `User` and `Task`.
-- **Schema Layer** (`backend/app/schemas/`): Pydantic models for robust data validation and serialization.
-
-## Domain Rules (Enforced)
-
-The system enforces three critical invariants:
-
-1. **Rule 1 — Completion constraint**: A task cannot be marked as `completed` if the current date is before the task's `start_date`.
-2. **Rule 2 — Assignment constraint**: A task cannot be assigned to a user whose status is `inactive`.
-3. **Rule 3 — Overlap constraint**: A user cannot be assigned to two tasks that overlap in time (inclusive of start and end dates).
-
-## Performance & Correctness
-
-- **Validation**: Every request is validated by Pydantic before reaching the service layer.
-- **Error Handling**: Domain rule violations return a consistent `HTTP 400` with a specific error code (`RULE_VIOLATION`) and a descriptive message.
-- **Structured Logging**: Key events (task creation, assignment, status changes, and rule violations) are logged with a structured format for observability.
-- **Testing**: A comprehensive suite of automated tests verifies both happy paths and every rule violation scenario.
-
-## Setup Instructions
-
-1. **Install Dependencies**:
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   ```
-
-3. **Run the Application**:
-   ```bash
-   python -m app.main
-   ```
-   The server will start at `http://127.0.0.1:5000`.
-
-## Test Instructions
-
-To run the automated tests:
+### Backend (Python + Flask)
 ```bash
+cd backend
+pip install -r requirements.txt
+python -m app.main
+```
+
+### Frontend (React + Vite)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Key Technical Decisions
+
+### Layered Architecture (DDD Lite)
+The system is divided into strict layers to ensure **Change Resilience**:
+- **API Layer**: Handles HTTP concerns.
+- **Service Layer**: Orchestrates business operations.
+- **Domain Layer**: Pure business logic (Invariants).
+- **Persistence Layer**: Data storage (SQLAlchemy).
+
+### Strict Rule Enforcement
+Rules are defined as pure functions in `backend/app/domain/rules.py`. This ensures **Correctness** by centralizing the "brain" of the application away from framework-specific code.
+
+### Robust Validation
+We use **Pydantic** on the backend and **Zod** (in inferred types) on the frontend. This provides **Interface Safety**, guarding the system against malformed data.
+
+## AI Usage & Guidance
+
+This project was built using "Agentic AI" workflows. To maintain system integrity, we used a specific guidance file:
+- **[AI Guidance](file:///c:/Projects/assignment/ai_guidance.md)**: Contains constraints on layer logic, testing requirements, and forbidden practices (e.g., no DB calls in routes).
+
+**Review Process**: All AI-generated code was critically reviewed for adherence to these guidelines, specifically ensuring that domain rules were never bypassed.
+
+## Project Structure & Walkthrough
+
+### Backend (Python + Flask)
+The backend is structured to separate business logic from technical infrastructure:
+- **`app/main.py`**: The application entry point. It initializes the Flask app, sets up SQLAlchemy, and registers the API routes.
+- **`app/db.py`**: Manages the database connection and session lifecycle.
+- **`app/api/routes.py`**: Defines the RESTful endpoints. It focuses on request orchestration and delegating to services.
+- **`app/services/task_service.py`**: The "Business Orchestrator". It coordinates database operations and ensures domain rules are invoked before any state change.
+- **`app/domain/rules.py`**: **The Core Rules Engine**. Contains pure Python functions that enforce the assessment's invariants (Completion, Assignment, and Overlap constraints).
+- **`app/models/models.py`**: Defines the SQLAlchemy database schemas for `User` and `Task`.
+- **`app/schemas/schemas.py`**: Uses Pydantic to enforce strict data validation for every request and response.
+- **`app/seed.py`**: A utility script to populate the database with consistent test data.
+
+### Frontend (React + TS)
+A modular and type-safe frontend built with Vite:
+- **`src/App.tsx`**: Sets up the global layout, navigation sidebar, and page routing.
+- **`src/pages/Tasks.tsx`**: The main interface for managing tasks, displaying rule violation errors clearly to the user.
+- **`src/pages/Users.tsx`**: Management interface for users and their active/inactive status.
+- **`src/api/client.ts`**: A centralized, type-safe API client that handles communication with the Flask backend.
+- **`src/types/index.ts`**: Contains the shared TypeScript interfaces used across the application.
+- **`src/lib/utils.ts`**: Helper utilities for dynamic Tailwind CSS styling.
+
+## Verification
+
+### Automated Tests
+The system's correctness is proven by a suite of tests that verify both successful flows and every single rule violation:
+```bash
+cd backend
 python -m pytest tests/test_tasks.py
 ```
 
-## Extension Strategy
+## Walkthrough Video
+*(Recording coming soon - explaining architecture, AI usage, and extension approach)*
 
-- **Adding New Rules**: New rules should be added as validation functions in `backend/app/domain/rules.py` and invoked by the `TaskService`.
-- **Adding Task States**: Add the new state to the `TaskStatus` enum in `backend/app/models/models.py`. The Pydantic schemas will automatically handle the new enum value.
-- **New Fields**: Add the field to the SQLAlchemy model and the corresponding Pydantic schemas.
+## Extension Approach
+
+- **New Rules**: Add to `domain/rules.py` and invoke in the Service.
+- **Observability**: Failures are captured via structured logging and returned with unique error codes for frontend diagnosis.
