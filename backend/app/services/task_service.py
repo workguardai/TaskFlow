@@ -29,11 +29,13 @@ class TaskService:
         )
 
     @staticmethod
-    def create_user(name: str, status: str = "active") -> User:
+    def create_user(name: str, status: any = UserStatus.ACTIVE) -> User:
+        # Extract value if it's an enum
+        status_val = status.value if hasattr(status, 'value') else status
         with db.get_cursor() as cur:
             cur.execute(
                 "INSERT INTO users (name, status) VALUES (%s, %s) RETURNING *",
-                (name, status)
+                (name, status_val)
             )
             row = cur.fetchone()
             user = TaskService._row_to_user(row)
