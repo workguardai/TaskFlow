@@ -21,21 +21,27 @@ export function Footer() {
                     <div className="flex flex-col items-center md:items-end space-y-4">
                         <div className="flex space-x-6 text-muted-foreground">
                             <motion.a
-                                href="#"
+                                href="https://github.com/pratham-srivastava-07"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 whileHover={{ scale: 1.1, color: 'hsl(var(--primary))' }}
                                 className="transition-colors"
                             >
                                 <Github className="h-5 w-5" />
                             </motion.a>
                             <motion.a
-                                href="#"
+                                href="https://x.com/_pratham_rs"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 whileHover={{ scale: 1.1, color: 'hsl(var(--primary))' }}
                                 className="transition-colors"
                             >
                                 <Twitter className="h-5 w-5" />
                             </motion.a>
                             <motion.a
-                                href="#"
+                                href="https://www.linkedin.com/in/pratham-srivastava-047813258/"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 whileHover={{ scale: 1.1, color: 'hsl(var(--primary))' }}
                                 className="transition-colors"
                             >
